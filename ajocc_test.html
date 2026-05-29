@@ -1,0 +1,19 @@
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<div id="graph"></div>
+
+<script>
+const data = [
+  {
+    x: [1, 2, 3],
+    y: [10, 15, 13],
+    name: '系列A'
+  },
+  {
+    x: [1, 2, 3],
+    y: [16, 5, 11],
+    name: '系列B'
+  }
+];
+
+Plotly.newPlot('graph', data);
+</script>
