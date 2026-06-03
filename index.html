@@ -14,263 +14,163 @@
     --text: #e8eaf2;
     --muted: #8890a8;
     --accent: #4fc3f7;
-    --accent2: #81d4fa;
     --green: #69f0ae;
     --amber: #ffd740;
-    --red: #ff5252;
     --font: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif;
     --mono: 'JetBrains Mono', 'Consolas', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100vh;
-  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
 
   /* Header */
   header {
     border-bottom: 1px solid var(--border);
-    padding: 1.25rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    padding: 1rem 2rem;
+    display: flex; align-items: center; gap: 1rem;
   }
   .logo {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--accent);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    border: 1px solid var(--accent);
-    padding: 3px 8px;
-    border-radius: 3px;
+    font-family: var(--mono); font-size: 0.7rem; color: var(--accent);
+    letter-spacing: 0.15em; border: 1px solid var(--accent);
+    padding: 3px 8px; border-radius: 3px; flex-shrink: 0;
   }
-  .race-title {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text);
-  }
-  .race-cat {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    color: var(--accent);
-    background: rgba(79,195,247,0.1);
-    padding: 2px 10px;
-    border-radius: 3px;
-    margin-left: auto;
+  .header-race-name { font-size: 0.95rem; font-weight: 500; color: var(--text); }
+  .header-cat {
+    font-family: var(--mono); font-size: 0.72rem; color: var(--accent);
+    background: rgba(79,195,247,0.1); padding: 2px 10px; border-radius: 3px;
+    margin-left: auto; flex-shrink: 0;
   }
 
-  /* Drop zone */
-  #dropzone {
-    margin: 2rem auto;
-    max-width: 860px;
-    border: 1.5px dashed rgba(79,195,247,0.4);
-    border-radius: 12px;
-    padding: 2.5rem;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    position: relative;
-  }
-  #dropzone.dragover {
-    border-color: var(--accent);
-    background: rgba(79,195,247,0.05);
-  }
-  #dropzone.hidden { display: none; }
-  #dropzone .dz-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.75rem;
-    opacity: 0.6;
-  }
-  #dropzone p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
-  #dropzone strong { color: var(--accent); }
-  #dropzone input[type=file] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer;
-  }
-  .sample-btn {
-    margin-top: 1rem;
-    padding: 6px 18px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--muted);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.82rem;
-    font-family: var(--font);
-    transition: color 0.15s, border-color 0.15s;
-  }
-  .sample-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  /* Layout */
+  .layout { display: flex; height: calc(100vh - 55px); overflow: hidden; }
 
-  /* Main content */
-  #main { display: none; max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem; }
-  #main.visible { display: block; }
-
-  /* Controls bar */
-  .controls {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 1.5rem 0 1rem;
-    flex-wrap: wrap;
-  }
-  .tab-group {
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 7px;
+  /* Sidebar */
+  .sidebar {
+    width: 300px; flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
     overflow: hidden;
   }
-  .tab {
-    padding: 7px 18px;
-    font-size: 0.82rem;
-    font-family: var(--font);
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
+  .sidebar-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .sidebar-head input[type=search] {
+    width: 100%;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px;
+    padding: 7px 10px; font-size: 0.83rem; font-family: var(--font);
+    outline: none;
+  }
+  .sidebar-head input[type=search]:focus { border-color: rgba(79,195,247,0.5); }
+  .season-filter {
+    display: flex; gap: 5px; flex-wrap: wrap;
+  }
+  .season-btn {
+    padding: 3px 10px; border-radius: 4px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    font-size: 0.75rem; font-family: var(--font); cursor: pointer;
     transition: color 0.15s, background 0.15s;
   }
-  .tab.active {
-    background: rgba(79,195,247,0.12);
-    color: var(--accent);
-  }
-  .spacer { flex: 1; }
-  .change-btn {
-    padding: 7px 14px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--muted);
-    font-size: 0.8rem;
-    font-family: var(--font);
+  .season-btn.active { background: rgba(79,195,247,0.12); color: var(--accent); border-color: rgba(79,195,247,0.3); }
+  .race-count { font-size: 0.72rem; color: var(--muted); }
+
+  .race-list { overflow-y: auto; flex: 1; }
+  .race-item {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
     cursor: pointer;
-    transition: color 0.15s;
+    transition: background 0.1s;
   }
-  .change-btn:hover { color: var(--text); }
+  .race-item:hover { background: rgba(255,255,255,0.03); }
+  .race-item.active { background: rgba(79,195,247,0.07); border-left: 2px solid var(--accent); }
+  .race-item .ri-name { font-size: 0.83rem; color: var(--text); margin-bottom: 3px; line-height: 1.4; }
+  .race-item .ri-meta { font-size: 0.72rem; color: var(--muted); display: flex; gap: 8px; }
+  .ri-cat {
+    font-family: var(--mono); font-size: 0.68rem;
+    background: rgba(79,195,247,0.08); color: var(--accent);
+    padding: 1px 6px; border-radius: 3px;
+  }
 
-  /* Stats row */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 10px;
-    margin-bottom: 1.25rem;
+  /* Loading / empty states */
+  .state-msg {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 12px; color: var(--muted); font-size: 0.9rem; text-align: center;
+    padding: 2rem;
   }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 18px;
+  .state-msg .icon { font-size: 2rem; opacity: 0.4; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
   }
-  .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-  .stat-value { font-size: 1.35rem; font-family: var(--mono); color: var(--text); }
-  .stat-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Chart container */
-  .chart-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    position: relative;
-  }
-  .chart-wrap canvas { max-height: 360px; }
+  /* Main panel */
+  .main-panel { flex: 1; overflow-y: auto; padding: 1.5rem 2rem 3rem; }
 
-  /* Rider toggles */
-  .riders-label {
-    font-size: 0.72rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 10px;
+  /* Controls */
+  .controls { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .tab-group { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+  .tab {
+    padding: 6px 16px; font-size: 0.82rem; font-family: var(--font);
+    background: transparent; border: none; color: var(--muted); cursor: pointer;
+    transition: color 0.15s, background 0.15s;
   }
-  .rider-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 1.5rem;
-  }
+  .tab.active { background: rgba(79,195,247,0.12); color: var(--accent); }
+
+  /* Stats */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+  .stat-value { font-size: 1.25rem; font-family: var(--mono); }
+  .stat-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+  /* Chart */
+  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; }
+  .chart-wrap canvas { max-height: 340px; }
+
+  /* Rider chips */
+  .riders-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .rider-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 1.25rem; }
   .chip {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 5px 13px 5px 9px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    cursor: pointer;
-    font-size: 0.82rem;
-    color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 12px 4px 8px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface);
+    cursor: pointer; font-size: 0.8rem; color: var(--muted);
     transition: color 0.15s, border-color 0.15s, background 0.15s;
     user-select: none;
   }
-  .chip.active {
-    color: var(--text);
-    background: var(--surface2);
-  }
-  .chip .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .chip .rank-badge {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    background: rgba(255,255,255,0.07);
-    padding: 1px 5px;
-    border-radius: 3px;
-    color: var(--muted);
-  }
+  .chip.active { color: var(--text); background: var(--surface2); }
+  .chip .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .chip .rank-badge { font-family: var(--mono); font-size: 0.66rem; background: rgba(255,255,255,0.07); padding: 1px 5px; border-radius: 3px; }
 
-  /* Result table */
-  .result-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.83rem;
-  }
+  /* Table */
+  .result-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
   .result-table th {
-    text-align: left;
-    padding: 8px 12px;
-    color: var(--muted);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 1px solid var(--border);
-    font-weight: 400;
+    text-align: left; padding: 7px 10px;
+    color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border); font-weight: 400;
   }
-  .result-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    font-family: var(--mono);
-    font-size: 0.82rem;
-  }
+  .result-table td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: var(--mono); }
   .result-table tr:last-child td { border-bottom: none; }
-  .result-table .rider-name { font-family: var(--font); }
-  .result-table .pos-cell {
-    font-weight: 500;
-    width: 40px;
-  }
-  .pos-1 { color: var(--amber); }
-  .pos-2 { color: #bdbdbd; }
-  .pos-3 { color: #a97c50; }
+  .rider-name { font-family: var(--font) !important; }
+  .pos-1 { color: var(--amber); } .pos-2 { color: #bdbdbd; } .pos-3 { color: #a97c50; }
   .best-lap { color: var(--green); }
   .dns-row { opacity: 0.4; font-style: italic; }
-  .color-swatch {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    margin-right: 6px;
-    vertical-align: middle;
-  }
+  .color-swatch { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+  /* Updated at */
+  .updated-at { font-size: 0.7rem; color: var(--muted); text-align: right; margin-bottom: 0.5rem; }
 
   /* Responsive */
-  @media (max-width: 640px) {
-    header { padding: 1rem; }
-    #main { padding: 0 1rem 3rem; }
-    .stats-row { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 700px) {
+    .layout { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; height: 260px; border-right: none; border-bottom: 1px solid var(--border); }
+    .main-panel { padding: 1rem; }
+    header { padding: 0.75rem 1rem; }
   }
 </style>
 </head>
@@ -278,398 +178,356 @@
 
 <header>
   <span class="logo">AJOCCC</span>
-  <span class="race-title" id="header-title">シクロクロスラップタイム分析</span>
-  <span class="race-cat" id="header-cat"></span>
+  <span class="header-race-name" id="header-title">シクロクロス ラップタイム分析</span>
+  <span class="header-cat" id="header-cat"></span>
 </header>
 
-<!-- Drop Zone -->
-<div id="dropzone">
-  <div class="dz-icon">📂</div>
-  <p><strong>CSVファイルをここにドロップ</strong><br>
-     またはクリックしてファイルを選択<br>
-     <small style="color:rgba(136,144,168,0.6)">data.cyclocross.jp からダウンロードした CSV に対応</small></p>
-  <input type="file" accept=".csv" id="file-input">
-  <br>
-  <button class="sample-btn" id="sample-btn">サンプルデータで試す</button>
-</div>
-
-<!-- Main content (shown after CSV loaded) -->
-<div id="main">
-  <div class="controls">
-    <div class="tab-group">
-      <button class="tab active" data-tab="laptime">ラップタイム</button>
-      <button class="tab" data-tab="cumulative">累積タイム</button>
+<div class="layout">
+  <!-- Sidebar: race selector -->
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <input type="search" id="race-search" placeholder="レース名・大会名で検索…">
+      <div class="season-filter" id="season-filter"></div>
+      <div class="race-count" id="race-count"></div>
     </div>
-    <div class="spacer"></div>
-    <button class="change-btn" id="change-file-btn">別のCSVを読み込む</button>
-  </div>
+    <div class="race-list" id="race-list">
+      <div class="state-msg"><div class="spinner"></div><span>データ読み込み中…</span></div>
+    </div>
+  </aside>
 
-  <!-- Stats -->
-  <div class="stats-row" id="stats-row"></div>
-
-  <!-- Rider chips -->
-  <p class="riders-label">選手フィルター</p>
-  <div class="rider-chips" id="rider-chips"></div>
-
-  <!-- Chart -->
-  <div class="chart-wrap">
-    <canvas id="main-chart"></canvas>
-  </div>
-
-  <!-- Results table -->
-  <div class="chart-wrap" style="padding: 0.5rem 0;">
-    <table class="result-table" id="result-table">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <!-- Main: chart + table -->
+  <main class="main-panel" id="main-panel">
+    <div class="state-msg" id="empty-state">
+      <div class="icon">📊</div>
+      <span>左のリストからレースを選択してください</span>
+    </div>
+    <div id="race-view" style="display:none">
+      <div class="updated-at" id="updated-at"></div>
+      <div class="controls">
+        <div class="tab-group">
+          <button class="tab active" data-tab="laptime">ラップタイム</button>
+          <button class="tab" data-tab="cumulative">累積タイム</button>
+        </div>
+      </div>
+      <div class="stats-row" id="stats-row"></div>
+      <p class="riders-label">選手フィルター</p>
+      <div class="rider-chips" id="rider-chips"></div>
+      <div class="chart-wrap"><canvas id="main-chart"></canvas></div>
+      <div class="chart-wrap" style="padding:0.5rem 0; overflow-x:auto;">
+        <table class="result-table" id="result-table"><thead></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </main>
 </div>
 
 <script>
 const COLORS = [
   '#4fc3f7','#69f0ae','#ffd740','#ff5252','#ce93d8',
   '#80cbc4','#ffab40','#f48fb1','#a5d6a7','#90caf9',
-  '#fff176','#ef9a9a','#80deea','#ffcc02','#b39ddb'
+  '#fff176','#ef9a9a','#80deea','#b39ddb','#ffcc02'
 ];
 
+let allRaces = [];
+let filteredRaces = [];
+let currentRace = null;
 let chartInstance = null;
-let raceData = null;
 let visibleRiders = new Set();
 let currentTab = 'laptime';
+let currentSeason = 'all';
 
-// ---- CSV Parser ----
-function parseCSV(text) {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
-  if (lines.length < 2) return null;
-
-  // Line 0: date + race name + category
-  const headerLine = lines[0];
-  const parts = headerLine.split(/\s+/);
-  const date = parts[0] || '';
-  // category is last token if it looks like ME1, WE1, C1, etc.
-  const cat = parts[parts.length - 1] || '';
-  const raceName = parts.slice(1, parts.length - 1).join(' ');
-
-  // Line 1: column names
-  const cols = lines[1].split(',');
-  const lapCount = cols.length - 2; // subtract 順位 and 選手
-
-  const riders = [];
-  for (let i = 2; i < lines.length; i++) {
-    const row = lines[i].split(',');
-    if (row.length < 2) continue;
-    const pos = row[0].trim();
-    const name = row[1].trim();
-    if (!name) continue;
-
-    const lapStrings = row.slice(2);
-    const cumTimes = []; // cumulative in seconds
-    const lapTimes = []; // per-lap in seconds
-
-    for (let j = 0; j < lapCount; j++) {
-      const raw = (lapStrings[j] || '').trim();
-      const sec = parseTime(raw);
-      if (sec !== null) {
-        cumTimes.push(sec);
-        if (j === 0) lapTimes.push(sec);
-        else lapTimes.push(sec - cumTimes[cumTimes.length - 2]);
-      }
-    }
-
-    riders.push({ pos, name, cumTimes, lapTimes });
-  }
-
-  return { date, raceName, cat, lapCount, riders };
-}
-
-function parseTime(s) {
+// ---- Time helpers ----
+function parseTimeSec(s) {
   if (!s) return null;
-  // formats: 7:56.7  or  1:00:01.2
   const parts = s.split(':');
   if (parts.length === 2) {
-    const m = parseFloat(parts[0]);
-    const sec = parseFloat(parts[1]);
-    if (isNaN(m) || isNaN(sec)) return null;
-    return m * 60 + sec;
+    const m = parseFloat(parts[0]), sec = parseFloat(parts[1]);
+    return isNaN(m)||isNaN(sec) ? null : m*60+sec;
   } else if (parts.length === 3) {
-    const h = parseFloat(parts[0]);
-    const m = parseFloat(parts[1]);
-    const sec = parseFloat(parts[2]);
-    if (isNaN(h) || isNaN(m) || isNaN(sec)) return null;
-    return h * 3600 + m * 60 + sec;
+    const h = parseFloat(parts[0]), m = parseFloat(parts[1]), sec = parseFloat(parts[2]);
+    return isNaN(h)||isNaN(m)||isNaN(sec) ? null : h*3600+m*60+sec;
   }
   return null;
 }
-
-function formatTime(sec) {
-  if (sec === null || isNaN(sec)) return '—';
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = (sec % 60).toFixed(1);
-  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(4,'0')}`;
+function formatSec(sec) {
+  if (sec===null||isNaN(sec)) return '—';
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=(sec%60).toFixed(1);
+  if (h>0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(4,'0')}`;
   return `${m}:${String(s).padStart(4,'0')}`;
 }
 
-// ---- Render UI ----
-function render(data) {
-  raceData = data;
-  const finishers = data.riders.filter(r => !isNaN(parseInt(r.pos)));
-  visibleRiders = new Set(finishers.map(r => r.name));
-
-  document.getElementById('header-title').textContent = data.raceName || 'シクロクロス ラップタイム';
-  document.getElementById('header-cat').textContent = data.cat;
-
-  renderStats(data);
-  renderChips(data);
-  renderChart();
-  renderTable(data);
-
-  document.getElementById('dropzone').classList.add('hidden');
-  document.getElementById('main').classList.add('visible');
+// races.json のラップタイムは累積タイム文字列なので差分でラップタイムを計算
+function processRider(rider) {
+  const cumSecs = rider.lapTimes.map(parseTimeSec);
+  const lapSecs = cumSecs.map((v,i) => {
+    if (v===null) return null;
+    return i===0 ? v : (cumSecs[i-1]===null ? null : v - cumSecs[i-1]);
+  });
+  return { ...rider, cumSecs, lapSecs };
 }
 
-function renderStats(data) {
-  const finishers = data.riders.filter(r => !isNaN(parseInt(r.pos)));
-  const allLapTimes = finishers.flatMap(r => r.lapTimes);
-  const bestLap = Math.min(...allLapTimes);
-  const bestLapRider = finishers.find(r => r.lapTimes.includes(bestLap));
-  const winner = finishers.find(r => r.pos === '1');
-  const totalTime = winner ? winner.cumTimes[winner.cumTimes.length - 1] : null;
+// ---- Load races.json ----
+async function loadRaces() {
+  try {
+    const res = await fetch('races.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    allRaces = (json.races || []).map(r => ({
+      ...r,
+      riders: (r.riders || []).map(processRider)
+    }));
 
-  const statsEl = document.getElementById('stats-row');
-  statsEl.innerHTML = `
+    // updatedAt
+    if (json.updatedAt) {
+      const d = new Date(json.updatedAt);
+      document.getElementById('updated-at').textContent =
+        `最終更新: ${d.toLocaleDateString('ja-JP')} ${d.toLocaleTimeString('ja-JP', {hour:'2-digit',minute:'2-digit'})} UTC`;
+    }
+
+    buildSeasonFilter();
+    renderRaceList();
+  } catch(e) {
+    document.getElementById('race-list').innerHTML =
+      `<div class="state-msg"><div class="icon">⚠️</div><span>races.json の読み込みに失敗しました<br><small style="color:rgba(136,144,168,0.6)">${e.message}</small></span></div>`;
+  }
+}
+
+// ---- Season filter ----
+function buildSeasonFilter() {
+  const seasons = new Set();
+  allRaces.forEach(r => {
+    if (r.date) {
+      const y = r.date.slice(0,4);
+      const m = parseInt(r.date.slice(5,7));
+      // シクロクロスシーズンは10月〜翌3月なので年をまたぐ
+      const sy = m >= 10 ? parseInt(y) : parseInt(y)-1;
+      seasons.add(`${sy}-${sy+1}`);
+    }
+  });
+  const sorted = [...seasons].sort().reverse();
+  const el = document.getElementById('season-filter');
+  el.innerHTML = `<button class="season-btn active" data-season="all">すべて</button>` +
+    sorted.map(s => `<button class="season-btn" data-season="${s}">${s}</button>`).join('');
+  el.querySelectorAll('.season-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSeason = btn.dataset.season;
+      renderRaceList();
+    });
+  });
+}
+
+function raceSeasonKey(r) {
+  if (!r.date) return '';
+  const y = parseInt(r.date.slice(0,4));
+  const m = parseInt(r.date.slice(5,7));
+  const sy = m >= 10 ? y : y-1;
+  return `${sy}-${sy+1}`;
+}
+
+// ---- Race list ----
+function renderRaceList() {
+  const query = document.getElementById('race-search').value.toLowerCase();
+  filteredRaces = allRaces.filter(r => {
+    if (currentSeason !== 'all' && raceSeasonKey(r) !== currentSeason) return false;
+    if (query) {
+      const haystack = `${r.raceName} ${r.meetName} ${r.category}`.toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('race-count').textContent = `${filteredRaces.length} レース`;
+
+  const el = document.getElementById('race-list');
+  if (filteredRaces.length === 0) {
+    el.innerHTML = '<div class="state-msg"><span>該当なし</span></div>';
+    return;
+  }
+
+  el.innerHTML = filteredRaces.map(r => `
+    <div class="race-item${currentRace && currentRace.id===r.id?' active':''}" data-id="${r.id}">
+      <div class="ri-name">${r.meetName || r.raceName || '名称不明'}</div>
+      <div class="ri-meta">
+        <span>${r.date || ''}</span>
+        <span class="ri-cat">${r.category || ''}</span>
+      </div>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('.race-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const race = allRaces.find(r => r.id === item.dataset.id);
+      if (race) selectRace(race);
+    });
+  });
+}
+
+// ---- Select race ----
+function selectRace(race) {
+  currentRace = race;
+  const finishers = race.riders.filter(r => !isNaN(parseInt(r.pos)));
+  visibleRiders = new Set(finishers.map(r => r.name));
+
+  document.getElementById('header-title').textContent = race.meetName || race.raceName || '';
+  document.getElementById('header-cat').textContent = race.category || '';
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('race-view').style.display = 'block';
+
+  renderStats(race);
+  renderChips(race);
+  renderChart();
+  renderTable(race);
+  renderRaceList(); // アクティブ状態更新
+}
+
+// ---- Stats ----
+function renderStats(race) {
+  const finishers = race.riders.filter(r => !isNaN(parseInt(r.pos)));
+  const allLaps = finishers.flatMap(r => r.lapSecs.filter(v => v !== null));
+  const bestLap = allLaps.length ? Math.min(...allLaps) : null;
+  const bestLapRider = bestLap !== null ? finishers.find(r => r.lapSecs.includes(bestLap)) : null;
+  const winner = finishers.find(r => r.pos === '1');
+  const totalSec = winner ? winner.cumSecs.filter(v=>v!==null).at(-1) : null;
+
+  document.getElementById('stats-row').innerHTML = `
     <div class="stat-card">
       <div class="stat-label">出走者</div>
-      <div class="stat-value">${data.riders.length}</div>
+      <div class="stat-value">${race.riders.length}</div>
       <div class="stat-sub">完走 ${finishers.length}名</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">周回数</div>
-      <div class="stat-value">${data.lapCount}</div>
+      <div class="stat-value">${(race.lapLabels||[]).length || (race.riders[0]?.lapTimes?.length||'—')}</div>
       <div class="stat-sub">周</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">優勝タイム</div>
-      <div class="stat-value">${totalTime ? formatTime(totalTime) : '—'}</div>
+      <div class="stat-value">${formatSec(totalSec)}</div>
       <div class="stat-sub">${winner ? winner.name : ''}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">最速ラップ</div>
-      <div class="stat-value" style="color:var(--green)">${formatTime(bestLap)}</div>
+      <div class="stat-value" style="color:var(--green)">${formatSec(bestLap)}</div>
       <div class="stat-sub">${bestLapRider ? bestLapRider.name : ''}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">開催日</div>
-      <div class="stat-value" style="font-size:1rem">${data.date}</div>
-      <div class="stat-sub">&nbsp;</div>
     </div>
   `;
 }
 
-function renderChips(data) {
-  const finishers = data.riders.filter(r => !isNaN(parseInt(r.pos)));
+// ---- Chips ----
+function renderChips(race) {
+  const finishers = race.riders.filter(r => !isNaN(parseInt(r.pos)));
   const el = document.getElementById('rider-chips');
   el.innerHTML = '';
-  finishers.forEach((r, i) => {
-    const color = COLORS[i % COLORS.length];
+  finishers.forEach((r,i) => {
+    const color = COLORS[i%COLORS.length];
     const chip = document.createElement('div');
     chip.className = 'chip active';
-    chip.innerHTML = `
-      <span class="dot" style="background:${color}"></span>
-      ${r.name}
-      <span class="rank-badge">${r.pos}</span>
-    `;
+    chip.innerHTML = `<span class="dot" style="background:${color}"></span>${r.name}<span class="rank-badge">${r.pos}</span>`;
     chip.addEventListener('click', () => {
-      if (visibleRiders.has(r.name)) {
-        visibleRiders.delete(r.name);
-        chip.classList.remove('active');
-      } else {
-        visibleRiders.add(r.name);
-        chip.classList.add('active');
-      }
+      if (visibleRiders.has(r.name)) { visibleRiders.delete(r.name); chip.classList.remove('active'); }
+      else { visibleRiders.add(r.name); chip.classList.add('active'); }
       renderChart();
     });
     el.appendChild(chip);
   });
 }
 
+// ---- Chart ----
 function renderChart() {
-  const data = raceData;
-  const finishers = data.riders.filter(r => !isNaN(parseInt(r.pos)));
+  const race = currentRace;
+  const finishers = race.riders.filter(r => !isNaN(parseInt(r.pos)));
   const visible = finishers.filter(r => visibleRiders.has(r.name));
   const isLap = currentTab === 'laptime';
+  const lapCount = (race.lapLabels||[]).length || (race.riders[0]?.lapTimes?.length||0);
+  const labels = Array.from({length: lapCount}, (_,i) => `${i+1}周`);
 
-  const labels = Array.from({ length: data.lapCount }, (_, i) => `${i + 1}周`);
-
-  const datasets = visible.map((r, i) => {
-    const origIdx = finishers.indexOf(r);
-    const color = COLORS[origIdx % COLORS.length];
-    const vals = isLap ? r.lapTimes : r.cumTimes;
+  const datasets = visible.map((r,i) => {
+    const idx = finishers.indexOf(r);
+    const color = COLORS[idx%COLORS.length];
+    const vals = isLap ? r.lapSecs : r.cumSecs;
     return {
-      label: r.name,
-      data: vals,
-      borderColor: color,
-      backgroundColor: color + '22',
-      borderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      tension: 0.25,
-      fill: false,
+      label: r.name, data: vals,
+      borderColor: color, backgroundColor: color+'22',
+      borderWidth: 2, pointRadius: 4, pointHoverRadius: 6,
+      tension: 0.25, fill: false,
+      spanGaps: false,
     };
   });
 
-  const yTickCallback = (v) => formatTime(v);
-
   if (chartInstance) chartInstance.destroy();
-
-  const ctx = document.getElementById('main-chart').getContext('2d');
-  chartInstance = new Chart(ctx, {
+  chartInstance = new Chart(document.getElementById('main-chart').getContext('2d'), {
     type: 'line',
     data: { labels, datasets },
     options: {
-      responsive: true,
-      animation: { duration: 300 },
-      interaction: { mode: 'index', intersect: false },
+      responsive: true, animation: {duration: 250},
+      interaction: {mode:'index', intersect:false},
       plugins: {
-        legend: { display: false },
+        legend: {display:false},
         tooltip: {
-          backgroundColor: '#1e2230',
-          borderColor: 'rgba(255,255,255,0.1)',
-          borderWidth: 1,
-          titleColor: '#8890a8',
-          bodyColor: '#e8eaf2',
-          callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${formatTime(ctx.parsed.y)}`
-          }
+          backgroundColor:'#1e2230', borderColor:'rgba(255,255,255,0.1)', borderWidth:1,
+          titleColor:'#8890a8', bodyColor:'#e8eaf2',
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatSec(ctx.parsed.y)}` }
         }
       },
       scales: {
-        x: {
-          grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: { color: '#8890a8', font: { size: 11 } }
-        },
+        x: { grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#8890a8',font:{size:11}} },
         y: {
-          grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: {
-            color: '#8890a8',
-            font: { size: 11 },
-            callback: yTickCallback
-          },
-          title: {
-            display: true,
-            text: isLap ? 'ラップタイム' : '累積タイム',
-            color: '#8890a8',
-            font: { size: 11 }
-          },
-          ...(isLap ? { reverse: true } : {})
+          grid:{color:'rgba(255,255,255,0.05)'},
+          ticks:{color:'#8890a8',font:{size:11}, callback: v=>formatSec(v)},
+          title:{display:true, text: isLap?'ラップタイム':'累積タイム', color:'#8890a8', font:{size:11}},
+          ...(isLap ? {reverse:true} : {})
         }
       }
     }
   });
 }
 
-function renderTable(data) {
-  const finishers = data.riders.filter(r => !isNaN(parseInt(r.pos)));
-  const dns = data.riders.filter(r => isNaN(parseInt(r.pos)));
+// ---- Table ----
+function renderTable(race) {
+  const finishers = race.riders.filter(r => !isNaN(parseInt(r.pos)));
+  const dns = race.riders.filter(r => isNaN(parseInt(r.pos)));
+  const allLaps = finishers.flatMap(r => r.lapSecs.filter(v=>v!==null));
+  const bestLap = allLaps.length ? Math.min(...allLaps) : null;
+  const lapCount = (race.lapLabels||[]).length || (race.riders[0]?.lapTimes?.length||0);
 
-  const allLapTimes = finishers.flatMap(r => r.lapTimes);
-  const bestLap = Math.min(...allLapTimes);
-
-  const lapHeaders = Array.from({ length: data.lapCount }, (_, i) =>
-    `<th>${i + 1}周</th>`).join('');
-
-  const thead = document.querySelector('#result-table thead');
-  thead.innerHTML = `<tr><th>順位</th><th>選手</th><th>合計</th>${lapHeaders}</tr>`;
+  const lapHeaders = Array.from({length:lapCount},(_,i)=>`<th>${i+1}周</th>`).join('');
+  document.querySelector('#result-table thead').innerHTML = `<tr><th>順位</th><th>選手</th><th>合計</th>${lapHeaders}</tr>`;
 
   const tbody = document.querySelector('#result-table tbody');
-  const allRows = [...finishers, ...dns];
-
-  tbody.innerHTML = allRows.map((r, i) => {
+  tbody.innerHTML = [...finishers,...dns].map(r => {
     const isDNS = isNaN(parseInt(r.pos));
-    const posClass = r.pos === '1' ? 'pos-1' : r.pos === '2' ? 'pos-2' : r.pos === '3' ? 'pos-3' : '';
-    const color = isDNS ? '#444' : COLORS[finishers.indexOf(r) % COLORS.length];
-    const totalSec = r.cumTimes.length ? r.cumTimes[r.cumTimes.length - 1] : null;
-
-    const lapCells = Array.from({ length: data.lapCount }, (_, j) => {
-      const lt = r.lapTimes[j];
-      const isBest = lt === bestLap;
-      return `<td class="${isBest ? 'best-lap' : ''}">${lt !== undefined ? formatTime(lt) : '—'}</td>`;
+    const posClass = r.pos==='1'?'pos-1':r.pos==='2'?'pos-2':r.pos==='3'?'pos-3':'';
+    const idx = finishers.indexOf(r);
+    const color = isDNS ? '#444' : COLORS[idx%COLORS.length];
+    const totalSec = r.cumSecs.filter(v=>v!==null).at(-1) ?? null;
+    const lapCells = Array.from({length:lapCount},(_,j)=>{
+      const lt = r.lapSecs[j];
+      return `<td class="${lt===bestLap&&lt!==null?'best-lap':''}">${lt!==null&&lt!==undefined?formatSec(lt):'—'}</td>`;
     }).join('');
-
-    return `<tr class="${isDNS ? 'dns-row' : ''}">
-      <td class="pos-cell ${posClass}">${r.pos}</td>
-      <td class="rider-name">
-        <span class="color-swatch" style="background:${color}"></span>${r.name}
-      </td>
-      <td>${totalSec ? formatTime(totalSec) : '—'}</td>
-      ${lapCells}
+    return `<tr class="${isDNS?'dns-row':''}">
+      <td class="${posClass}" style="font-weight:500">${r.pos}</td>
+      <td class="rider-name"><span class="color-swatch" style="background:${color}"></span>${r.name}</td>
+      <td>${formatSec(totalSec)}</td>${lapCells}
     </tr>`;
   }).join('');
 }
 
-// ---- Tab switching ----
+// ---- Tab ----
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     currentTab = btn.dataset.tab;
-    renderChart();
+    if (currentRace) renderChart();
   });
 });
 
-// ---- File handling ----
-function loadFile(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = parseCSV(e.target.result);
-      if (!data || data.riders.length === 0) {
-        alert('CSVの読み込みに失敗しました。形式を確認してください。');
-        return;
-      }
-      render(data);
-    } catch (err) {
-      alert('エラー: ' + err.message);
-    }
-  };
-  reader.readAsText(file, 'UTF-8');
-}
+// ---- Search ----
+document.getElementById('race-search').addEventListener('input', renderRaceList);
 
-const dz = document.getElementById('dropzone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-dz.addEventListener('drop', e => {
-  e.preventDefault();
-  dz.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file) loadFile(file);
-});
-document.getElementById('file-input').addEventListener('change', e => {
-  if (e.target.files[0]) loadFile(e.target.files[0]);
-});
-document.getElementById('change-file-btn').addEventListener('click', () => {
-  document.getElementById('main').classList.remove('visible');
-  document.getElementById('dropzone').classList.remove('hidden');
-  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-});
-
-// ---- Sample data ----
-const SAMPLE_CSV = `2026-03-15 2025-26もみじシクロクロス第５戦（もみじシクロクロス） ME1
-順位,選手,1周,2周,3周,4周,5周,6周,7周
-1,和田 良平,7:56.7,16:24.7,24:48.3,33:08.2,41:24.3,49:50.7,58:27.8
-2,黒田 将広,7:52.3,16:21.1,24:43.8,33:18.7,41:49.6,50:53.1,1:00:01.2
-3,日比 正明,8:16.5,16:59.8,25:39.2,34:21.3,43:00.6,51:41.0,1:00:48.0
-4,末岡 英樹,8:02.9,17:02.7,25:50.1,34:34.2,43:19.6,52:11.4,1:01:01.5
-5,澤田 雄一,8:09.3,16:54.1,25:44.5,34:38.7,43:40.8,52:42.4,1:01:47.2
-6,西垣内 裕治,8:00.2,16:23.3,25:13.7,33:42.4,43:37.7,52:41.3,1:02:06.7
-7,岡野 達也,7:54.0,16:16.8,24:39.6,33:06.6,41:19.5,53:13.6,1:02:28.4
-8,増田 拓三,8:33.7,17:25.2,26:16.2,35:06.7,44:17.7,53:37.0,1:02:34.2
-DNS,清水 洋介,,,,,,,`;
-
-document.getElementById('sample-btn').addEventListener('click', () => {
-  const data = parseCSV(SAMPLE_CSV);
-  render(data);
-});
+// ---- Init ----
+loadRaces();
 </script>
 </body>
 </html>
