@@ -58,7 +58,7 @@ class MeetParser(HTMLParser):
         if tag == "a":
             attrs_dict = dict(attrs)
             href = attrs_dict.get("href", "")
-            if re.match(r"^/meet/\d+$", href):
+            if re.match(r"^/meet/[A-Z0-9]+-\d+-\d+$", href):
                 self._current_href = href
                 self._in_link = True
 
