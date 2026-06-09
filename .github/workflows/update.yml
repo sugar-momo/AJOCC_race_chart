@@ -1,0 +1,38 @@
+name: レースデータ更新
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: スクレイパー実行
+        run: python scraper.py
+
+      - name: races.json が更新されたかチェック
+        id: check
+        run: |
+          git diff --quiet races.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: 変更があればコミット & プッシュ
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add races.json
+          git commit -m "chore: レースデータ更新 $(date -u +'%Y-%m-%d')"
+          git push
