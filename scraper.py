@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-AJOCCシクロクロス ラップタイムスクレイパー v2
-/meet ページから直接 /race/NNN リンクを収集する方式に修正。
+AJOCCシクロクロス ラップタイムスクレイパー v3
+デバッグ: /meet ページ内の全 href を出力して構造を確認する
 """
 
 import json
@@ -38,12 +38,25 @@ def fetch(url: str) -> str:
         return ""
 
 
-# ---- /meet ページから /race/NNN と /meet/NNN を両方収集 ----
+class AllLinkParser(HTMLParser):
+    """ページ内の全 href を収集する"""
+    def __init__(self):
+        super().__init__()
+        self.all_hrefs = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            attrs_dict = dict(attrs)
+            href = attrs_dict.get("href", "")
+            if href:
+                self.all_hrefs.append(href)
+
+
 class MeetPageParser(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.race_links = {}   # id -> {id, url, context}
-        self.meet_links = {}   # id -> {id, url}
+        self.race_links = {}
+        self.meet_links = {}
         self._in_a = False
         self._current_href = None
         self._current_type = None
@@ -53,12 +66,14 @@ class MeetPageParser(HTMLParser):
         if tag == "a":
             attrs_dict = dict(attrs)
             href = attrs_dict.get("href", "")
-            if re.match(r"^/race/\d+$", href):
+            # /race/数字 または 完全URL
+            if re.search(r"/race/\d+", href):
                 self._current_href = href
                 self._current_type = "race"
                 self._in_a = True
                 self._buf = []
-            elif re.match(r"^/meet/[A-Z0-9]+-\d+-\d+$", href):
+            # /meet/英数字-数字-数字 または 完全URL
+            elif re.search(r"/meet/[A-Z0-9]+-\d+-\d+", href):
                 self._current_href = href
                 self._current_type = "meet"
                 self._in_a = True
@@ -67,22 +82,22 @@ class MeetPageParser(HTMLParser):
     def handle_endtag(self, tag):
         if tag == "a" and self._in_a:
             text = "".join(self._buf).strip()
+            href = self._current_href
             if self._current_type == "race":
-                rid = self._current_href.split("/")[-1]
-                if rid not in self.race_links:
-                    self.race_links[rid] = {
-                        "id": rid,
-                        "url": BASE_URL + self._current_href,
-                        "label": text,
-                    }
+                # IDとURLを正規化
+                m = re.search(r"/race/(\d+)", href)
+                if m:
+                    rid = m.group(1)
+                    url = f"{BASE_URL}/race/{rid}"
+                    if rid not in self.race_links:
+                        self.race_links[rid] = {"id": rid, "url": url, "label": text}
             elif self._current_type == "meet":
-                mid = self._current_href.split("/")[-1]
-                if mid not in self.meet_links:
-                    self.meet_links[mid] = {
-                        "id": mid,
-                        "url": BASE_URL + self._current_href,
-                        "name": text,
-                    }
+                m = re.search(r"/meet/([A-Z0-9]+-\d+-\d+)", href)
+                if m:
+                    mid = m.group(1)
+                    url = f"{BASE_URL}/meet/{mid}"
+                    if mid not in self.meet_links:
+                        self.meet_links[mid] = {"id": mid, "url": url, "name": text}
             self._in_a = False
             self._current_href = None
             self._current_type = None
@@ -93,7 +108,6 @@ class MeetPageParser(HTMLParser):
             self._buf.append(data)
 
 
-# ---- /meet/NNN ページから /race/NNN リンクを収集 ----
 class MeetDetailParser(HTMLParser):
     def __init__(self, meet_name=""):
         super().__init__()
@@ -107,7 +121,7 @@ class MeetDetailParser(HTMLParser):
         if tag == "a":
             attrs_dict = dict(attrs)
             href = attrs_dict.get("href", "")
-            if re.match(r"^/race/\d+$", href):
+            if re.search(r"/race/\d+", href):
                 self._current_href = href
                 self._in_a = True
                 self._buf = []
@@ -115,13 +129,15 @@ class MeetDetailParser(HTMLParser):
     def handle_endtag(self, tag):
         if tag == "a" and self._in_a:
             text = "".join(self._buf).strip()
-            rid = self._current_href.split("/")[-1]
-            self.races.append({
-                "id": rid,
-                "url": BASE_URL + self._current_href,
-                "category": text,
-                "meetName": self.meet_name,
-            })
+            m = re.search(r"/race/(\d+)", self._current_href)
+            if m:
+                rid = m.group(1)
+                self.races.append({
+                    "id": rid,
+                    "url": f"{BASE_URL}/race/{rid}",
+                    "category": text,
+                    "meetName": self.meet_name,
+                })
             self._in_a = False
             self._current_href = None
             self._buf = []
@@ -131,7 +147,6 @@ class MeetDetailParser(HTMLParser):
             self._buf.append(data)
 
 
-# ---- レースページのラップタイムテーブル解析 ----
 class LaptimeParser(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -225,7 +240,7 @@ def load_existing(path):
 
 
 def main():
-    print("=== AJOCCラップタイムスクレイパー v2 開始 ===")
+    print("=== AJOCCラップタイムスクレイパー v3 開始 ===")
     existing = load_existing(OUTPUT_FILE)
     existing_ids = {r["id"] for r in existing.get("races", [])}
     print(f"既存レース数: {len(existing_ids)}")
@@ -235,26 +250,30 @@ def main():
     meet_html = fetch(MEET_URL)
     if not meet_html:
         print("  取得失敗。終了。"); sys.exit(1)
-
     print(f"  取得HTML長: {len(meet_html)} bytes")
 
-    # /meet ページから race と meet 両方のリンクを収集
+    # デバッグ: 全hrefのうち /meet/ か /race/ を含むものを先頭30件表示
+    link_parser = AllLinkParser()
+    link_parser.feed(meet_html)
+    meet_race_hrefs = [h for h in link_parser.all_hrefs if "/meet/" in h or "/race/" in h]
+    print(f"\n  [DEBUG] /meet/ or /race/ を含むリンク（先頭30件）:")
+    for h in meet_race_hrefs[:30]:
+        print(f"    {h}")
+
+    # 本番パース
     meet_page_parser = MeetPageParser()
     meet_page_parser.feed(meet_html)
-    direct_races = meet_page_parser.race_links   # /meet に直接 /race リンクがある場合
-    meet_links = meet_page_parser.meet_links     # /meet/NNN リンク
+    direct_races = meet_page_parser.race_links
+    meet_links = meet_page_parser.meet_links
 
-    print(f"  /meet から直接見つかった /race リンク数: {len(direct_races)}")
-    print(f"  /meet から見つかった /meet/NNN リンク数: {len(meet_links)}")
+    print(f"\n  /race リンク数: {len(direct_races)}")
+    print(f"  /meet/XXX-NNN-NNN リンク数: {len(meet_links)}")
 
-    # 2. /meet/NNN ページも辿って race リンクを収集
-    all_race_stubs = {}  # id -> stub
-
-    # 直接リンクを追加
+    # 2. /meet/XXX-NNN-NNN を辿る
+    all_race_stubs = {}
     for rid, r in direct_races.items():
         all_race_stubs[rid] = {"id": rid, "url": r["url"], "category": r["label"], "meetName": ""}
 
-    # /meet/NNN を辿る
     for mid, meet in meet_links.items():
         time.sleep(REQUEST_INTERVAL)
         print(f"  ミート取得: {meet['name']} ({meet['url']})")
@@ -270,7 +289,6 @@ def main():
 
     print(f"\n[2] 合計ユニークレース数: {len(all_race_stubs)}")
 
-    # 3. 新規レースのみラップタイムを取得
     new_stubs = [r for r in all_race_stubs.values() if r["id"] not in existing_ids]
     print(f"  新規レース数: {len(new_stubs)}")
 
@@ -288,7 +306,6 @@ def main():
         else:
             print(f"    → ラップタイムなし（スキップ）")
 
-    # 4. 統合・保存
     all_races = existing.get("races", []) + new_race_data
     all_races.sort(key=lambda r: (r.get("date") or "0000-00-00"), reverse=True)
 
