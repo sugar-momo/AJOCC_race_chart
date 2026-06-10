@@ -7,15 +7,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #ffffff;  <!-- #0d0f14; -->
-    --surface: #f5f5f5; <!--#161921;-->
-    --surface2: #eeeeee; <!--#1e2230;-->
-    --border: rgba(0,0,0,0.1); <!--rgba(255,255,255,0.08);-->
-    --text: #000000;  <!--#e8eaf2;-->
-    --muted: #8890a8;
-    --accent: #4fc3f7;
-    --green: #69f0ae;
-    --amber: #ffd740;
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface2: #eef0f4;
+    --border: rgba(0,0,0,0.1);
+    --text: #1a1d26;
+    --muted: #6b7280;
+    --accent: #0077cc;
+    --accent2: #005fa3;
+    --green: #16a34a;
+    --amber: #b45309;
     --font: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif;
     --mono: 'JetBrains Mono', 'Consolas', monospace;
   }
@@ -30,14 +31,15 @@
   }
   .logo {
     font-family: var(--mono); font-size: 0.7rem; color: var(--accent);
-    letter-spacing: 0.15em; border: 1px solid var(--accent);
+    letter-spacing: 0.15em; border: 1.5px solid var(--accent);
     padding: 3px 8px; border-radius: 3px; flex-shrink: 0;
+    font-weight: 600;
   }
   .header-race-name { font-size: 0.95rem; font-weight: 500; color: var(--text); }
   .header-cat {
     font-family: var(--mono); font-size: 0.72rem; color: var(--accent);
-    background: rgba(79,195,247,0.1); padding: 2px 10px; border-radius: 3px;
-    margin-left: auto; flex-shrink: 0;
+    background: rgba(0,119,204,0.1); padding: 2px 10px; border-radius: 3px;
+    margin-left: auto; flex-shrink: 0; font-weight: 600;
   }
 
   /* Layout */
@@ -76,21 +78,62 @@
   .race-count { font-size: 0.72rem; color: var(--muted); }
 
   .race-list { overflow-y: auto; flex: 1; }
-  .race-item {
-    padding: 10px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+
+  /* ツリー: 大会グループ */
+  .meet-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .meet-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 14px;
     cursor: pointer;
     transition: background 0.1s;
+    user-select: none;
   }
-  .race-item:hover { background: rgba(255,255,255,0.03); }
-  .race-item.active { background: rgba(79,195,247,0.07); border-left: 2px solid var(--accent); }
-  .race-item .ri-name { font-size: 0.83rem; color: var(--text); margin-bottom: 3px; line-height: 1.4; }
-  .race-item .ri-meta { font-size: 0.72rem; color: var(--muted); display: flex; gap: 8px; }
-  .ri-cat {
+  .meet-header:hover { background: rgba(255,255,255,0.03); }
+  .meet-header.has-active { background: rgba(79,195,247,0.04); }
+  .meet-arrow {
+    font-size: 0.6rem; color: var(--muted);
+    transition: transform 0.18s;
+    flex-shrink: 0; width: 10px;
+  }
+  .meet-group.open .meet-arrow { transform: rotate(90deg); }
+  .meet-info { flex: 1; min-width: 0; }
+  .meet-name {
+    font-size: 0.82rem; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.4;
+  }
+  .meet-meta { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+  .meet-count {
     font-family: var(--mono); font-size: 0.68rem;
-    background: rgba(79,195,247,0.08); color: var(--accent);
-    padding: 1px 6px; border-radius: 3px;
+    background: rgba(255,255,255,0.06); color: var(--muted);
+    padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
   }
+
+  /* ツリー: カテゴリ一覧 */
+  .cat-list {
+    display: none;
+    background: rgba(0,0,0,0.15);
+  }
+  .meet-group.open .cat-list { display: block; }
+  .cat-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 14px 7px 28px;
+    cursor: pointer;
+    border-top: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.1s;
+  }
+  .cat-item:hover { background: rgba(255,255,255,0.03); }
+  .cat-item.active {
+    background: rgba(79,195,247,0.08);
+    border-left: 2px solid var(--accent);
+    padding-left: 26px;
+  }
+  .cat-name {
+    font-family: var(--mono); font-size: 0.75rem; color: var(--accent);
+    background: rgba(79,195,247,0.08);
+    padding: 2px 8px; border-radius: 3px;
+  }
+  .cat-item.active .cat-name { background: rgba(79,195,247,0.18); }
 
   /* Loading / empty states */
   .state-msg {
@@ -325,7 +368,10 @@ function raceSeasonKey(r) {
   return `${sy}-${sy+1}`;
 }
 
-// ---- Race list ----
+// ---- Race list (tree) ----
+// 開閉状態を保持
+const openMeets = new Set();
+
 function renderRaceList() {
   const query = document.getElementById('race-search').value.toLowerCase();
   filteredRaces = allRaces.filter(r => {
@@ -345,22 +391,72 @@ function renderRaceList() {
     return;
   }
 
-  el.innerHTML = filteredRaces.map(r => `
-    <div class="race-item${currentRace && currentRace.id===r.id?' active':''}" data-id="${r.id}">
-      <div class="ri-name">${r.meetName || r.raceName || '名称不明'}</div>
-      <div class="ri-meta">
-        <span>${r.date || ''}</span>
-        <span class="ri-cat">${r.category || ''}</span>
-      </div>
-    </div>
-  `).join('');
+  // 大会でグループ化（meetName + date でキー）
+  const groups = [];
+  const groupMap = new Map();
+  for (const r of filteredRaces) {
+    const key = `${r.date||''}__${r.meetName||r.raceName||''}`;
+    if (!groupMap.has(key)) {
+      const g = { key, date: r.date, name: r.meetName || r.raceName || '名称不明', races: [] };
+      groups.push(g);
+      groupMap.set(key, g);
+    }
+    groupMap.get(key).races.push(r);
+  }
 
-  el.querySelectorAll('.race-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const race = allRaces.find(r => r.id === item.dataset.id);
-      if (race) selectRace(race);
+  // 検索中は全グループ展開
+  if (query) groups.forEach(g => openMeets.add(g.key));
+  // 現在選択中のレースが属するグループを展開
+  if (currentRace) {
+    const activeKey = `${currentRace.date||''}__${currentRace.meetName||currentRace.raceName||''}`;
+    openMeets.add(activeKey);
+  }
+  // デフォルト: 最初のグループを開く
+  if (openMeets.size === 0 && groups.length > 0) openMeets.add(groups[0].key);
+
+  el.innerHTML = '';
+  for (const g of groups) {
+    const isOpen = openMeets.has(g.key);
+    const hasActive = currentRace && g.races.some(r => r.id === currentRace.id);
+
+    const groupEl = document.createElement('div');
+    groupEl.className = `meet-group${isOpen ? ' open' : ''}`;
+
+    groupEl.innerHTML = `
+      <div class="meet-header${hasActive ? ' has-active' : ''}">
+        <span class="meet-arrow">▶</span>
+        <div class="meet-info">
+          <div class="meet-name">${g.name}</div>
+          <div class="meet-meta">${g.date || ''}</div>
+        </div>
+        <span class="meet-count">${g.races.length}</span>
+      </div>
+      <div class="cat-list">
+        ${g.races.map(r => `
+          <div class="cat-item${currentRace && currentRace.id===r.id ? ' active' : ''}" data-id="${r.id}">
+            <span class="cat-name">${r.category || '—'}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // 大会ヘッダークリックで開閉
+    groupEl.querySelector('.meet-header').addEventListener('click', () => {
+      if (openMeets.has(g.key)) openMeets.delete(g.key);
+      else openMeets.add(g.key);
+      groupEl.classList.toggle('open');
     });
-  });
+
+    // カテゴリクリックでレース選択
+    groupEl.querySelectorAll('.cat-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const race = allRaces.find(r => r.id === item.dataset.id);
+        if (race) selectRace(race);
+      });
+    });
+
+    el.appendChild(groupEl);
+  }
 }
 
 // ---- Select race ----
