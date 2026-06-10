@@ -273,7 +273,8 @@ def main():
     all_race_stubs = {}
     for rid, r in direct_races.items():
         all_race_stubs[rid] = {"id": rid, "url": r["url"], "category": r["label"], "meetName": ""}
-
+    
+    meet_links = dict(list(meet_links.items())[:50])  # テスト用: 直近20件のみ
     for mid, meet in meet_links.items():
         time.sleep(REQUEST_INTERVAL)
         print(f"  ミート取得: {meet['name']} ({meet['url']})")
